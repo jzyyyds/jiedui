@@ -69,42 +69,7 @@ public class Main {
             System.exit(0);
         }
     }
-    private static void creatGraFile(String exerciseFile,String answerFile){
-        //获取题目文件的答案
-        String ansFile="C:\\Users\\17680\\Desktop\\Answer.txt";
-        try(BufferedReader br= Files.newBufferedReader(Paths.get(ansFile))) {
-            String line=null;
-            List<String> res=new ArrayList<>();
-            while((line=br.readLine())!=null){
-                String[] split = line.split(".");
-                if(split.length>0){
-                    res.add(split[1]);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        try(BufferedReader br= Files.newBufferedReader(Paths.get(answerFile))) {
-            String line=null;
-            List<String> ans=new ArrayList<>();
-            while((line=br.readLine())!=null){
-                String[] split = line.split(".");
-                if(split.length>0){
-                    ans.add(split[1]);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        int right=0;
-        int wrong=0;
-        List<String> rightList=new ArrayList<>();
-        List<String> wrongList=new ArrayList<>();
-        for (int i = 0; i < ; i++) {
-            
-        }
-    }
 
 
     private static List<String> generate(int n,int r){
@@ -157,9 +122,12 @@ public class Main {
 
 
     private static void createProblem(int n,int r){
+        //创建问题集合和答案集合
         List<String> problem=new ArrayList<>();
         List<String> answer=new ArrayList<>();
+        //调用generate()生成表达式和答案集合
         List<String> generate = generate(n, r);
+        //将表达式和答案分开装入对应集合
         for (int i = 0; i < generate.size(); i++) {
             if(i%2==0){
                 problem.add(generate.get(i));
@@ -167,11 +135,13 @@ public class Main {
                 answer.add(generate.get(i));
             }
         }
-
+        //将表达式集合导出文件
         creatFile(problem);
+        //将答案集合导出文件
         creatAnsFile(answer);
-
     }
+
+
     private static void creatAnsFile(List<String> problem){
         File file=new File("C:\\Users\\17680\\Desktop\\Answer.txt");
         if(file.exists()){
@@ -223,26 +193,21 @@ public class Main {
         String[] countNum=new String[countOpera.length+1];
         String result=new String();
         boolean fenshu=false;
-
         //生成操作数集合
         for (int i = 0; i < countNum.length; i++) {
             //通过随机来产生整数还是分数
             int trueOrNot=random.nextInt(2);
-            if(trueOrNot==0){
-                //产生一个整数
+            if(trueOrNot==0){//产生一个整数
                 int number = random.nextInt(r+1);
                 countNum[i]=String.valueOf(number);
-            }else{
-                //产生一个分数
+            }else{//产生一个分数
                 //分母
                 int denominator=1+random.nextInt(r+1);
                 //分子
                 int molecule= random.nextInt(denominator);
                 //随机生成一个整数，如2‘2/3这个
                 int number=random.nextInt(r+1);
-
-                if(molecule!=0){
-                    //要进行最大公约数的约分，化简
+                if(molecule!=0){//要进行最大公约数的约分，化简
                     int yuefen = yuefen(denominator, molecule);
                     denominator/=yuefen;
                     molecule/=yuefen;
@@ -299,7 +264,6 @@ public class Main {
         hashMap.put("-",1);
         hashMap.put("*",2);
         hashMap.put("÷",2);
-
         for (int i = 0; i < result.length(); ) {
             StringBuilder sb=new StringBuilder();
             char c=result.charAt(i);
@@ -332,7 +296,6 @@ public class Main {
                         }
                         break;
                     }
-
                     case '=':{
                         String operation;
                         String res=new String();
@@ -385,6 +348,93 @@ public class Main {
             i++;
         }
         return stackNum.pop();
+    }
+
+    public static void creatGraFile(String exerciseFile,String answerFile){
+        //获取题目文件的答案
+        List<String> res=new ArrayList<>();
+        String ansFile="C:\\Users\\17680\\Desktop\\Answer.txt";
+        try(BufferedReader br= Files.newBufferedReader(Paths.get(ansFile))) {
+            String line=null;
+            while((line=br.readLine())!=null){
+                System.out.println(line);
+                if(line.equals("答案")){
+                    continue;
+                }else {
+                    int index = line.indexOf(".");
+                    res.add(line.substring(index+1));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for (String re : res) {
+            System.out.println(re);
+        }
+        List<String> ans=new ArrayList<>();
+        try(BufferedReader br= Files.newBufferedReader(Paths.get(answerFile))) {
+            String line=null;
+
+            while((line=br.readLine())!=null){
+                if(line.equals("答案")){
+                    continue;
+                }else {
+                    int index = line.indexOf(".");
+                    ans.add(line.substring(index+1));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int right=0;
+        int wrong=0;
+        List<String> rightList=new ArrayList<>();
+        List<String> wrongList=new ArrayList<>();
+        for (int i = 0; i < res.size(); i++) {
+            if(res.get(i).equals(ans.get(i))){
+                right++;
+                rightList.add(String.valueOf(i+1));
+            }else{
+                wrong++;
+                wrongList.add(String.valueOf(i+1));
+            }
+        }
+
+
+        File file=new File("C:\\Users\\17680\\Desktop\\Grade.txt");
+        if(file.exists()){
+            file.delete();
+        }
+        try {
+            if(file.createNewFile()){
+                FileOutputStream fileOutputStream=new FileOutputStream(file);
+                PrintStream printStream=new PrintStream(file);
+                StringBuilder sb=new StringBuilder();
+                StringBuilder sb1=new StringBuilder();
+                sb.append("Correct:"+right);
+                sb.append("(");
+                for (String s : rightList) {
+                    sb.append(s+",");
+                }
+                sb.deleteCharAt(sb.toString().length()-1);
+                sb.append(")");
+
+                sb1.append("Wrong:"+wrong);
+                sb1.append("(");
+                for (String s : wrongList) {
+                    sb1.append(s+",");
+                }
+                sb1.deleteCharAt(sb1.toString().length()-1);
+                sb1.append(")");
+                printStream.println(sb.toString());
+                printStream.println(sb1.toString());
+                fileOutputStream.close();
+                printStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private static String jisuan(String num1,String num2,String operation){
